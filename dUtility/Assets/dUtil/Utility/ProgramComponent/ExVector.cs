@@ -69,6 +69,45 @@ namespace du.Ex {
             return nullable ?? Vector2.zero;
         }
 
+        // ADD2du ------------------
+        public static Vector3 ElemProcessing(
+            Vector3 a, System.Func<float, float> proc)
+        {
+            return new Vector3(proc(a.x), proc(a.y), proc(a.z));
+        }
+
+        public static Vector3 ElemProcessing(
+            Vector3 a, Vector3 b, System.Func<float, float, float> proc)
+        {
+            return new Vector3(proc(a.x, b.x), proc(a.y, b.y), proc(a.z, b.z));
+        }
+
+        private static System.Func<float, float, float> Multiple
+            = delegate (float x, float y) { return x * y; };
+
+        public static Vector3 ElemProduct(Vector3 a, Vector3 b) {
+            return ElemProcessing(a, b, Multiple);
+        }
+
+
+        public static Vector3 ToXYz(this Vector2 vec2, float z) {
+            return new Vector3(vec2.x, vec2.y, z);
+        }
+        public static Vector3 ToXyZ(this Vector2 vec2, float y) {
+            return new Vector3(vec2.x, y, vec2.y);
+        }
+
+        public static Vector3 ChangeX(this Vector3 vec3, float x) {
+            return new Vector3(x, vec3.y, vec3.z);
+        }
+        public static Vector3 ChangeY(this Vector3 vec3, float y) {
+            return new Vector3(vec3.x, y, vec3.z);
+        }
+        public static Vector3 ChangeZ(this Vector3 vec3, float z) {
+            return new Vector3(vec3.x, vec3.y, z);
+        }
+        // -------------------------
+
 
     }
 
