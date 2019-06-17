@@ -41,14 +41,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 1977353788859768}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e622ae6cba4534c47ad77be07f4d9c0b, type: 3}
+  m_Script: {fileID: 11500000, guid: 93fa90a215cc9416895e5c451558f970, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_pilotScene: 
-  m_isMute: 1
-  m_masterVolume: 0.01
+  m_audioDesc:
+    isMute: 1
+    masterVolume: 0.01
+  m_resolutionDesc:
+    width: 0
+    height: 0
+    isFullscreen: 0
+    preferredRefreshRate: 60
   m_isDebugMode: 0
-  m_mcmode: 0
+  m_mcmode: 1
 --- !u!114 &2577754800629208964
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -58,7 +64,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1977353788859768}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 67dffd02d94d34b678dd78f13d525bea, type: 3}
+  m_Script: {fileID: 11500000, guid: bc99e5e598cdb44fe93d8105b8e613a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_isLogEnable: 1
@@ -68,3 +74,4 @@ MonoBehaviour:
   m_iaBoot: 1
   m_iAct: 1
   m_expLog: 1
+  m_mainBoot: 1
