@@ -164,7 +164,7 @@ namespace du.File {
             encoding = encoding ?? Encoding.GetEncoding("utf-8");
             LoadType(); // Tを解析する
             //! Resources内のファイルをロード
-            m_reader = loadFromResources ? CreateTextReaderFromResources(filePath) : CreateTextReaderRaw(filePath);
+            m_reader = loadFromResources ? CreateTextReaderFromResources(filePath) : CreateTextReaderRaw(du.App.AppManager.DataPath + filePath);
             if (m_reader == null) {
                 Debug.Assert(false, "failure to load file : " + filePath + ".csv");
                 return;

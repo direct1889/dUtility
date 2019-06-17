@@ -58,12 +58,12 @@ namespace du.File {
         #region static
         /// <param name="filePath"> 拡張子も含めて渡す </param>
         public static IFWriter OpenFile4Rewrite(string filePath) {
-            var writer = new FWriter(filePath);
+            var writer = new FWriter(du.App.AppManager.DataPath + filePath);
             writer.OpenRewrite();
             return writer;
         }
         public static IFWriter OpenFile4Append(string filePath) {
-            var writer = new FWriter(filePath);
+            var writer = new FWriter(du.App.AppManager.DataPath + filePath);
             writer.OpenAppend();
             return writer;
         }
