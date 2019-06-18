@@ -1,0 +1,5 @@
+#GamePadIndex, up, down, left, right,circle,cross,triangle,square, START, L2, L1, R1, R2,L3,R3
+_1P,E,D,S,F,Z,X,C,V,T,Alpha2,Alpha3,Alpha4,Alpha5,Q,W
+_2P,I,K,J,L,N,M,Comma,Period,P,Alpha7,Alpha8,Alpha9,Alpha0,Y,U
+_3P,UpArrow,DownArrow,LeftArrow,RightArrow,Return,Delete,Escape,Escape,Backspace,Escape,Escape,Escape,Escape,Escape,Escape
+_4P,Keypad8,Keypad2,Keypad4,Keypad6,Keypad0,KeypadMinus,Escape,Escape,KeypadPlus,Escape,Escape,Escape,Escape,Escape,Escape

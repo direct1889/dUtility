@@ -120,7 +120,7 @@ namespace du.di.Id {
 
             using (var rawGPWrapperReader =
                 new File.CSVReader<RawGamePadWrapper>
-                (App.AppManager.DataPath + "Utility/RawGamePadWrapper", true, false)
+                ("Utility/RawGamePadWrapper", true, false)
                 )
             {
                 rawGPWrapperReader.ToList().ForEach(
