@@ -87,7 +87,7 @@ namespace du {
 
                 m_input = new Dictionary<GamePadRaw, IUserInput>();
                 //! ファイルからキーボードとゲームパッドの対応を読み込む
-                using (var userGenerators = new File.CSVReader<UserInputGenerator>(App.AppManager.DataPath + "Utility/KeyInput4GamePad", true, false))
+                using (var userGenerators = new File.CSVReader<UserInputGenerator>("Utility/KeyInput4GamePad", true, false))
                 {
                     userGenerators.ToList().ForEach(
                         gen => m_input.Add(gen.GPRawID, gen.Generate())
