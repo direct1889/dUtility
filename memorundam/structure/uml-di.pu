@@ -1,0 +1,32 @@
+@startuml uml-di.png
+
+skinparam backgroundColor pink
+skinparam handwritten true
+
+title <size:18> di (directive Input Module) </size>
+
+package du {
+	package di {
+		class GamePad <static> {
+			+void Initialize()
+
+			+bool GetButtonDown(PlayerID, GPButton)
+			+bool GetButtonDown(GamePadID, GPButton)
+			+bool GetButton(GamePadID, GPButton)
+
+			+Vec2 GetArrowDPadVec2(GamePadID)
+			+bool GetArrowDPad(GamePadID, GPArrow)
+
+			+Vec2 GetLeftAxis(PlayerID)
+			+Vec2 GetLeftAxis(GamePadID)
+			+Vec3 GetLeftAxisXZ(PlayerID)
+			+Vec3 GetLeftAxisXZ(GamePadID)
+
+			+bool DebugKeyDown(KeyCode)
+		}
+	}
+}
+
+
+@enduml
+

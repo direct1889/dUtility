@@ -68,6 +68,11 @@ namespace du.Ex {
         /// <summary> x,y,zそれぞれにproc(x, x2)を適用したVec3(x',y',z')を生成 </summary>
         public static Vector3 Select(this Vector3 a, Vector3 b, System.Func<float, float, float> proc) => new Vector3(proc(a.x, b.x), proc(a.y, b.y), proc(a.z, b.z));
 
+        /// <summary> x,yそれぞれにprocを適用したVec3(x',y')を生成 </summary>
+        public static Vector2 Select(this Vector2 a, System.Func<float, float> proc) => new Vector2(proc(a.x), proc(a.y));
+        /// <summary> x,yそれぞれにproc(x, x2)を適用したVec3(x',y')を生成 </summary>
+        public static Vector2 Select(this Vector2 a, Vector3 b, System.Func<float, float, float> proc) => new Vector2(proc(a.x, b.x), proc(a.y, b.y));
+
         /// <summary> a=(x0,y0,z0), b=(x1,y1,z1)に対してret=(x0*x1,y0*y1,z0*z1) </summary>
         public static Vector3 ElemProduct(Vector3 a, Vector3 b) => Select(a, b, (float x, float y) => x * y);
 
