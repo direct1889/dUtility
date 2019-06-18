@@ -56,12 +56,13 @@ namespace du.File {
         #endregion
 
         #region static
-        /// <param name="filePath"> 拡張子も含めて渡す </param>
+        /// <param name="filePath"> du.App.AppManager.DataPath以下、拡張子を含めてファイル名を指定 </param>
         public static IFWriter OpenFile4Rewrite(string filePath) {
             var writer = new FWriter(du.App.AppManager.DataPath + filePath);
             writer.OpenRewrite();
             return writer;
         }
+        /// <param name="filePath"> du.App.AppManager.DataPath以下、拡張子を含めてファイル名を指定 </param>
         public static IFWriter OpenFile4Append(string filePath) {
             var writer = new FWriter(du.App.AppManager.DataPath + filePath);
             writer.OpenAppend();

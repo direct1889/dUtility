@@ -157,7 +157,7 @@ namespace du.File {
         #endregion
 
         #region ctor/dtor
-        /// <param name="filePath"> .csvを除いたファイル名を指定 </param>
+        /// <param name="filePath"> du.App.AppManager.DataPath以下、.csvを除いたファイル名を指定 </param>
         public CSVReader(string filePath, bool skipFirstLine, bool loadFromResources = false, Encoding encoding = null)
         {
             // 既定のエンコードの設定
