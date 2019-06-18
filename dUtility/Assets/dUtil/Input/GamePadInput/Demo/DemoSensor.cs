@@ -70,10 +70,10 @@ public class DemoSensor : MonoBehaviour {
             float factor = 12.0f;
             m_stickL.localPosition =
                 GPRawInput.GetAxis(GPAxis.LeftStick, m_gpId.ToRawID())
-                .ToXYz(0.0f) * factor;
+                .AddZ(0.0f) * factor;
             m_stickR.localPosition =
                 GPRawInput.GetAxis(GPAxis.RightStick, m_gpId.ToRawID())
-                .ToXYz(0.0f) * factor;
+                .AddZ(0.0f) * factor;
         }
 
     }
