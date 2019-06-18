@@ -15,28 +15,39 @@ using static du.Ex.ExVector;
 
 namespace du.di {
 
+    /// <summary>
+    /// ゲームパッドによる入力の管理
+    /// - デバッグ用としてキーボードからの入力も受け付ける
+    /// - ゲームパッドからとキーボードからの入力の違いを吸収する
+    /// </summary>
     public static class InputManager {
-
-
         #region public
-
+        /// <summary>
+        /// キーボードによる入力はあくまでデバッグ用とみなす
+        /// </summary>
         public static bool DebugKeyDown(KeyCode code) { return UInput.GetKeyDown(code); }
 
-
+        /// <summary> 初期化処理 </summary>
         public static void Initialize() {
             KeyInput4GamePad.Initialize();
             Id.IdConverter.Initialize();
         }
 
 
+        /// <returns> ボタンが押された瞬間 : true </returns>
         public static bool GetButtonDown(PlayerID    plID, GPButton button) { return GetButtonDown(plID.ToRawID(), button); }
+        /// <returns> ボタンが押された瞬間 : true </returns>
         public static bool GetButtonDown(GamePadID    gpID, GPButton button) { return GetButtonDown(gpID.ToRawID(), button); }
+        /// <returns> ボタンが押されている間 : true </returns>
         public static bool GetButton    (GamePadID    gpID, GPButton button) { return GetButton     (gpID.ToRawID(), button); }
 
+        /// <returns> 十字ボタンの入力をVector2で取得 </returns>
         public static Vector2 GetArrowDPadVec2(GamePadID gpID) { return GetArrowDPadVec2(gpID.ToRawID()); }
         public static bool GetArrowDPad(GamePadID gpID, GPArrow arrow) { return GetArrowDPad(gpID.ToRawID(), arrow); }
 
+        /// <returns> 左スティックの入力をVector2で取得 </returns>
         public static Vector2 GetLeftAxis    (PlayerID    plID) { return GetLeftAxis(plID.ToRawID()); }
+        /// <returns> 左スティックの入力をVector2で取得 </returns>
         public static Vector2 GetLeftAxis    (GamePadID    gpID) { return GetLeftAxis(gpID.ToRawID()); }
         public static Vector3 GetLeftAxisXZ    (PlayerID    plID) { return GetLeftAxis(plID.ToRawID()).ToXyZ(0f); }
         public static Vector3 GetLeftAxisXZ    (GamePadID    gpID) { return GetLeftAxis(gpID.ToRawID()).ToXyZ(0f); }
@@ -46,10 +57,12 @@ namespace du.di {
 
         #region private
 
+        /// <returns> ボタンが押された瞬間 : true </returns>
         private static bool GetButtonDown(GamePadRawID gpRawID, GPButton button) {
             return GamePad.GetButtonDown(button, gpRawID)
                 || di.KeyInput4GamePad.User(gpRawID).Button.GetDown(button);
         }
+        /// <returns> いずれかのボタンが押された瞬間 : true </returns>
         private static bool GetButtonDown(
             GamePadRawID gpRawID,
             params GPButton[] buttons) {
