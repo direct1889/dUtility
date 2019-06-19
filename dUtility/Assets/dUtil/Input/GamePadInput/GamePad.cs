@@ -21,7 +21,7 @@ namespace du.di {
         #region public
         /// <summary> 初期化処理 </summary>
         public static void Initialize() {
-            KeyInput4GamePad.Initialize();
+            KeyInputAsGamePad.Initialize();
             Id.IdConverter.Initialize();
         }
         #endregion
@@ -36,11 +36,21 @@ namespace du.di {
         public static bool GetButtonDown(PlayerID  plID, GPButton button) => GetButtonDown(plID.ToRawID(), button);
         /// <summary> ボタンが押された瞬間:true </summary>
         public static bool GetButtonDown(GamePadID gpID, GPButton button) => GetButtonDown(gpID.ToRawID(), button);
+        /// <summary> ボタンが押された瞬間:true </summary>
+        public static bool GetButtonUp  (PlayerID  plID, GPButton button) => GetButtonUp  (plID.ToRawID(), button);
+        /// <summary> ボタンが押された瞬間:true </summary>
+        public static bool GetButtonUp  (GamePadID gpID, GPButton button) => GetButtonUp  (gpID.ToRawID(), button);
         /// <summary> ボタンが押されている間:true </summary>
-        public static bool GetButton    (GamePadID gpID, GPButton button) => GetButton     (gpID.ToRawID(), button);
+        public static bool GetButton    (PlayerID  plID, GPButton button) => GetButton    (plID.ToRawID(), button);
+        /// <summary> ボタンが押されている間:true </summary>
+        public static bool GetButton    (GamePadID gpID, GPButton button) => GetButton    (gpID.ToRawID(), button);
 
         /// <summary> 十字ボタンの入力をVector2で取得 </summary>
+        public static Vector2 GetArrowDPadVec2(PlayerID plID) => GetArrowDPadVec2(plID.ToRawID());
+        /// <summary> 十字ボタンの入力をVector2で取得 </summary>
         public static Vector2 GetArrowDPadVec2(GamePadID gpID) => GetArrowDPadVec2(gpID.ToRawID());
+        /// <summary> 十字ボタンの指定方向が押されているか </summary>
+        public static bool GetArrowDPad(PlayerID plID, GPArrow arrow) => GetArrowDPad(plID.ToRawID(), arrow);
         /// <summary> 十字ボタンの指定方向が押されているか </summary>
         public static bool GetArrowDPad(GamePadID gpID, GPArrow arrow) => GetArrowDPad(gpID.ToRawID(), arrow);
 
@@ -64,23 +74,23 @@ namespace du.di {
         /// <summary> ボタンが押された瞬間 : true </summary>
         private static bool GetButtonDown(GamePadRawID gpRawID, GPButton button) {
             return GamepadInput.GamePadImpl.GetButtonDown(button, gpRawID)
-                || di.KeyInput4GamePad.User(gpRawID).Button.GetDown(button);
+                || di.KeyInputAsGamePad.User(gpRawID).Button.GetDown(button);
         }
         /// <summary> いずれかのボタンが押された瞬間 : true </summary>
         private static bool GetButtonDown(GamePadRawID gpRawID, params GPButton[] buttons) {
-            return buttons.Any(i => di.KeyInput4GamePad.User(gpRawID).Button.GetDown(i));
+            return buttons.Any(i => di.KeyInputAsGamePad.User(gpRawID).Button.GetDown(i));
         }
 
         /// <summary> ボタンが放された瞬間 : true </summary>
         private static bool GetButtonUp(GamePadRawID gpRawID, GPButton button) {
             return GamepadInput.GamePadImpl.GetButtonUp(button, gpRawID)
-                || di.KeyInput4GamePad.User(gpRawID).Button.GetUp(button);
+                || di.KeyInputAsGamePad.User(gpRawID).Button.GetUp(button);
         }
 
         /// <summary> ボタンが押されている間 : true </summary>
         private static bool GetButton(GamePadRawID gpRawID, GPButton button) {
             return GamepadInput.GamePadImpl.GetButton(button, gpRawID)
-                || di.KeyInput4GamePad.User(gpRawID).Button.Get(button);
+                || di.KeyInputAsGamePad.User(gpRawID).Button.Get(button);
         }
 
         /// <summary> 十字ボタンの指定方向が押されているか </summary>
@@ -99,7 +109,7 @@ namespace du.di {
         /// <summary> 十字ボタンの入力をVector2で取得 </summary>
         private static Vector2 GetArrowDPadVec2(GamePadRawID gpRawID) {
             return (GamepadInput.GamePadImpl.GetAxis(GPAxis.Dpad, gpRawID)
-                + di.KeyInput4GamePad.User(gpRawID).Arrow.GetVector())
+                + di.KeyInputAsGamePad.User(gpRawID).Arrow.GetVector())
                 .Clamped(-1f, 1f);
         }
 
@@ -125,7 +135,7 @@ namespace du.di {
             Vector2 total
                 = GamepadInput.GamePadImpl.GetAxis(GPAxis.LeftStick, gpRawID)        // アナログスティック
                 + GamepadInput.GamePadImpl.GetAxis(GPAxis.Dpad, gpRawID)             // 十字ボタン
-                + KeyInput4GamePad.User(gpRawID).Arrow.GetVector(); // キーボード
+                + KeyInputAsGamePad.User(gpRawID).Arrow.GetVector(); // キーボード
 
             if (total.magnitude <= 1f) { return total; }
             else { return total / total.magnitude; }

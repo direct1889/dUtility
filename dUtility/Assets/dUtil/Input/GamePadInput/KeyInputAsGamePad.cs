@@ -8,10 +8,10 @@ namespace du.di {
     /// ゲームパッド入力をキーボード入力でシミュレート
     /// -
     /// </summary>
-    public static class KeyInput4GamePad {
+    public static class KeyInputAsGamePad {
         #region field
         /// <summary> GP生IDごとのキー入力ベースGamePadシミュレータ </summary>
-        static IDictionary<GamePadRaw, IUserInput> m_input;
+        static IDictionary<GamePadRaw, IUserKeyAsGP> m_input;
         #endregion
 
         #region public
@@ -19,21 +19,21 @@ namespace du.di {
         public static void Initialize() {
             if (!(m_input is null)) { return; } // すでに初期化済みなら終了
 
-            m_input = new Dictionary<GamePadRaw, IUserInput>();
+            m_input = new Dictionary<GamePadRaw, IUserKeyAsGP>();
             // CSVファイルから対応を読み込む
-            using (var reader = new File.CSVReader<UserInputDesc>("Utility/KeyInput4GamePad", true))
+            using (var reader = new File.CSVReader<UserKeyAsGPDesc>("Utility/KeyInput4GamePad", true))
             {
                 foreach (var desc in reader) {
                     m_input.Add(desc.GPRawID, desc.Generate());
                 }
             }
-            m_input.Add(GamePadRaw.Any, new AnyUserInput(m_input.Values));
+            m_input.Add(GamePadRaw.Any, new AnyUserKeyAsGP(m_input.Values));
         }
         #endregion
 
         #region getter
         /// <summary> GP生IDからユーザ入力対応表を引く </summary>
-        public static IUserInput User(GamePadRaw rawID) => m_input[rawID];
+        public static IUserKeyAsGP User(GamePadRaw rawID) => m_input[rawID];
         #endregion
 
         #region private
@@ -41,7 +41,7 @@ namespace du.di {
         /// 単一ユーザのゲームパッド入力をキーボード入力でシミュレート
         /// - CSVからどのキーをどのボタンとして扱うかの対応表を生成する
         /// </summary>
-        private class UserInputDesc {
+        private class UserKeyAsGPDesc {
             #region field
             /// <summary> ゲームパッドの生ID </summary>
             [File.CSVColAttr(0)] GamePadRaw gpRawID;
@@ -85,11 +85,11 @@ namespace du.di {
             public GamePadRaw GPRawID => gpRawID;
 
             /// <summary> 対応表(IUserInput)を生成 </summary>
-            public IUserInput Generate() {
-                IArrowInput arrow =
-                    new ArrowInput(up, down, left, right);
-                IButtonInput button =
-                    new ButtonInput(
+            public IUserKeyAsGP Generate() {
+                IArrowKeyAsGP arrow =
+                    new ArrowKeyAsGP(up, down, left, right);
+                IButtonKeyAsGP button =
+                    new ButtonKeyAsGP(
                         new Dictionary<GPButton, KeyCode>(){
                             { GPButton.Triangle, triangle },
                             { GPButton.Circle  , circle   },
@@ -103,7 +103,7 @@ namespace du.di {
                             { GPButton.RightStick    , r3 },
                             { GPButton.LeftStick     , l3 }
                         });
-                return new UserInput(arrow, button);
+                return new UserKeyAsGP(arrow, button);
             }
             #endregion
         }

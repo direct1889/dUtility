@@ -6,7 +6,7 @@ using UInput = UnityEngine.Input;
 namespace du.di {
 
     /// <summary> 方向入力対応表 </summary>
-    public interface IArrowInput {
+    public interface IArrowKeyAsGP {
         /// <summary> 方向入力が押されている間:true </summary>
         bool Get(GPArrow arrow);
         /// <summary> ボタンが押された瞬間:true </summary>
@@ -33,7 +33,7 @@ namespace du.di {
     /// 抽象方向入力対応表
     /// - 実装によって異なるのはGet/GetDown/GetUpのみ、それ以外を共通化
     /// </summary>
-    public abstract class AbsArrowInput : IArrowInput {
+    public abstract class AbsArrowKeyAsGP : IArrowKeyAsGP {
         #region getter
         public abstract bool Get    (GPArrow arrow);
         public abstract bool GetDown(GPArrow arrow);
@@ -65,7 +65,7 @@ namespace du.di {
     }
 
     /// <summary> 単一ユーザ用方向入力対応表 </summary>
-    public class ArrowInput : AbsArrowInput {
+    public class ArrowKeyAsGP : AbsArrowKeyAsGP {
         #region field
         /// <value> 対応表の実体 </value>
         IDictionary<GPArrow, KeyCode> Corresponds { get; }
@@ -76,7 +76,7 @@ namespace du.di {
         /// <param name="down"> 方向入力下と対応するキー </param>
         /// <param name="left"> 方向入力左と対応するキー </param>
         /// <param name="right"> 方向入力右と対応するキー </param>
-        public ArrowInput(KeyCode up, KeyCode down, KeyCode left, KeyCode right) {
+        public ArrowKeyAsGP(KeyCode up, KeyCode down, KeyCode left, KeyCode right) {
             Corresponds = new Dictionary<GPArrow, KeyCode>()
                 {
                     { GPArrow.Up    , up    },
@@ -103,14 +103,14 @@ namespace du.di {
     /// Anyユーザ用方向入力対応表
     /// - ArrowInputを複数持ち、そのいずれかが発火していれば全体も発火
     /// </summary>
-    public class AnyArrowInput : AbsArrowInput {
+    public class AnyArrowKeyAsGP : AbsArrowKeyAsGP {
         #region field
         /// <value> 対応表の実体 </value>
-        IEnumerable<IArrowInput> Arrows { get; }
+        IEnumerable<IArrowKeyAsGP> Arrows { get; }
         #endregion
 
         #region ctor
-        public AnyArrowInput(IEnumerable<IArrowInput> arrows) { Arrows = arrows; }
+        public AnyArrowKeyAsGP(IEnumerable<IArrowKeyAsGP> arrows) { Arrows = arrows; }
         #endregion
 
         #region getter

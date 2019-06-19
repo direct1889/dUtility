@@ -6,7 +6,7 @@ using UInput = UnityEngine.Input;
 namespace du.di {
 
     /// <summary> ボタン対応表 </summary>
-    public interface IButtonInput {
+    public interface IButtonKeyAsGP {
         /// <summary> ボタンが押されている間:true </summary>
         bool Get(GPButton button);
         /// <summary> ボタンが押された瞬間:true </summary>
@@ -26,7 +26,7 @@ namespace du.di {
     /// 抽象ボタン対応表
     /// - 実装によって異なるのはGet/GetDown/GetUpのみ、それ以外を共通化
     /// </summary>
-    public abstract class AbsButtonInput : IButtonInput {
+    public abstract class AbsButtonKeyAsGP : IButtonKeyAsGP {
         #region getter
         public abstract bool Get    (GPButton button);
         public abstract bool GetDown(GPButton button);
@@ -39,7 +39,7 @@ namespace du.di {
     }
 
     /// <summary> 単一ユーザ用ボタン対応表 </summary>
-    public class ButtonInput : AbsButtonInput {
+    public class ButtonKeyAsGP : AbsButtonKeyAsGP {
         #region field
         /// <summary> 対応表の実体 </summary>
         IDictionary<GPButton, KeyCode> m_keys;
@@ -47,7 +47,7 @@ namespace du.di {
 
         #region ctor
         /// <param name="map"> ボタンとキー入力の対応辞書 </param>
-        public ButtonInput(IDictionary<GPButton, KeyCode> map) { m_keys = map; }
+        public ButtonKeyAsGP(IDictionary<GPButton, KeyCode> map) { m_keys = map; }
         #endregion
 
         #region getter
@@ -66,13 +66,13 @@ namespace du.di {
     /// Anyユーザ用ボタン対応表
     /// - ButtonInputを複数持ち、そのいずれかが発火していれば全体も発火
     /// </summary>
-    public class AnyButtonInput : AbsButtonInput {
+    public class AnyButtonKeyAsGP : AbsButtonKeyAsGP {
         #region field
-        IEnumerable<IButtonInput> Buttons { get; }
+        IEnumerable<IButtonKeyAsGP> Buttons { get; }
         #endregion
 
         #region ctor
-        public AnyButtonInput(IEnumerable<IButtonInput> buttons) { Buttons = buttons; }
+        public AnyButtonKeyAsGP(IEnumerable<IButtonKeyAsGP> buttons) { Buttons = buttons; }
         #endregion
 
         #region getter
