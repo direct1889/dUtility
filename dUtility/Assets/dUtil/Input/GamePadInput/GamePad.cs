@@ -2,7 +2,6 @@
 using System.Linq;
 
 using GamePadRawID = du.di.Id.GamePadRaw;
-using GamepadInput;
 
 using UInput = UnityEngine.Input;
 using PlayerID = du.di.Id.Player;

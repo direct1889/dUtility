@@ -12,6 +12,9 @@ package du {
 			enum PlayerID
 			enum GamePadID
 			enum GamePadRawID
+			PlayerID --- GamePadID
+			GamePadID --- GamePadRawID
+			GamePadRawID --- PlayerID
 
 			class IdConverter <static> {
 				+{static} GamePad ToGamePadID(Player playerID)
@@ -35,18 +38,18 @@ package du {
 			enum GPAxis
 		}
 
-		interface IUserInput {
-			+IArrowInput Arrow
-			+IButtonInput Button
+		interface IUserKeyAsGP {
+			+IArrowKeyAsGP Arrow
+			+IButtonKeyAsGP Button
 		}
-		IUserInput <|.. UserInput
-		IUserInput <|.. AnyUserInput
-		UserInput o-down- IArrowInput
-		UserInput o-down- IButtonInput
-		AnyUserInput o-down- IArrowInput
-		AnyUserInput o-down- IButtonInput
+		IUserKeyAsGP <|.. UserKeyAsGP
+		IUserKeyAsGP <|.. AnyUserKeyAsGP
+		UserKeyAsGP o-down- IArrowKeyAsGP
+		UserKeyAsGP o-down- IButtonKeyAsGP
+		AnyUserKeyAsGP o-down- IArrowKeyAsGP
+		AnyUserKeyAsGP o-down- IButtonKeyAsGP
 
-		interface IButtonInput {
+		interface IButtonKeyAsGP {
 			+bool Get(GPButton button);
 			+bool GetDown(GPButton button);
 			+bool GetUp(GPButton button);
@@ -55,17 +58,17 @@ package du {
 			+float GetDownF(GPButton button);
 			+float GetUpF(GPButton button);
 		}
-		abstract AbsButtonInput {
+		abstract AbsButtonKeyAsGP {
 			{abstract}+bool Get(GPButton button);
 			{abstract}+bool GetDown(GPButton button);
 			{abstract}+bool GetUp(GPButton button);
 		}
-		IButtonInput <|.. AbsButtonInput
-		AbsButtonInput <|-- ButtonInput
-		AbsButtonInput <|-- AnyButtonInput
-		IButtonInput --o AnyButtonInput
+		IButtonKeyAsGP <|.. AbsButtonKeyAsGP
+		AbsButtonKeyAsGP <|-- ButtonKeyAsGP
+		AbsButtonKeyAsGP <|-- AnyButtonKeyAsGP
+		IButtonKeyAsGP --o AnyButtonKeyAsGP
 
-		interface IArrowInput {
+		interface IArrowKeyAsGP {
 			+bool Get(GPArrow button);
 			+bool GetDown(GPArrow button);
 			+bool GetUp(GPArrow button);
@@ -78,15 +81,15 @@ package du {
 			+Vector2 GetVectorDown();
 			+Vector2 GetVectorUp();
 		}
-		abstract AbsArrowInput {
+		abstract AbsArrowKeyAsGP {
 			{abstract}+bool Get(GPArrow button);
 			{abstract}+bool GetDown(GPArrow button);
 			{abstract}+bool GetUp(GPArrow button);
 		}
-		IArrowInput <|.. AbsArrowInput
-		AbsArrowInput <|-- ArrowInput
-		AbsArrowInput <|-- AnyArrowInput
-		IArrowInput --o AnyArrowInput
+		IArrowKeyAsGP <|.. AbsArrowKeyAsGP
+		AbsArrowKeyAsGP <|-- ArrowKeyAsGP
+		AbsArrowKeyAsGP <|-- AnyArrowKeyAsGP
+		IArrowKeyAsGP --o AnyArrowKeyAsGP
 
 		package GamepadInput {
 			class GamePadImpl <static> {
@@ -104,21 +107,23 @@ package du {
 
 		class KeyInput4GamePad <static> {
 			+{static} void Initialize()
-			+{static} IUserInput User(GamePadRawID)
+			+{static} IUserKeyAsGP User(GamePadRawID)
 		}
-		class UserInputDesc {
+		class UserKeyAsGPDesc {
 			+GamePadRaw GPRawID
-			+IUserInput Generate()
+			+IUserKeyAsGP Generate()
 		}
-		KeyInput4GamePad --down- UserInputDesc
-		KeyInput4GamePad o-down- IUserInput
-		UserInputDesc --right- IUserInput
+		KeyInput4GamePad --down- UserKeyAsGPDesc
+		KeyInput4GamePad o-down- IUserKeyAsGP
+		UserKeyAsGPDesc --right- IUserKeyAsGP
 
 		class GamePad <static> {
 			+void Initialize()
 
 			+bool GetButtonDown(PlayerID, GPButton)
 			+bool GetButtonDown(GamePadID, GPButton)
+			+bool GetButtonUp(PlayerID, GPButton)
+			+bool GetButtonUp(GamePadID, GPButton)
 			+bool GetButton(GamePadID, GPButton)
 
 			+Vec2 GetArrowDPadVec2(GamePadID)
@@ -133,6 +138,10 @@ package du {
 		}
 		GamePad --> GamePadImpl
 		GamePad --> KeyInput4GamePad
+
+		interface IPlayerInput
+		IPlayerInput <|.. PlayerInput
+		PlayerInput ..> GamePad
 	}
 }
 
