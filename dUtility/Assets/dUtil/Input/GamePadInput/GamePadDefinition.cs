@@ -2,6 +2,7 @@
 
 namespace du.di {
 
+    /// <summary> ゲームパッドのボタン </summary>
     public enum GPButton {
         Triangle, Circle, Cross, Square,
         RightShoulder1, LeftShoulder1, RightShoulder2, LeftShoulder2,
@@ -9,6 +10,7 @@ namespace du.di {
         Select, Start,
     }
 
+    /// <summary> ゲームパッドの方向入力の方向 </summary>
     public enum GPArrow {
         Left, Right, Up, Down, Any, Arrow_Max
     }
@@ -16,7 +18,8 @@ namespace du.di {
         Horizontal, Vertical
     }
     //public enum Trigger { LeftTrigger, RightTrigger }
+
+    /// <summary> ゲームパッドの方向入力ソース </summary>
     public enum GPAxis { Any, LeftStick, RightStick, Dpad }
-    public enum Index { Any, One, Two, Three, Four, Index_Max }
 
 }

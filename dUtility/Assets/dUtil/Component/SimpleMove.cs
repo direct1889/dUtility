@@ -44,14 +44,14 @@ namespace Cmp {
         public Vector3 MoveVector() {
             if (m_isXZ) {
                 return new Vector3(
-                    di.InputManager.GetLeftAxis(Player).x * Factor.x,
+                    di.GamePad.GetLeftAxis(Player).x * Factor.x,
                     0,
-                    di.InputManager.GetLeftAxis(Player).y * Factor.z
+                    di.GamePad.GetLeftAxis(Player).y * Factor.z
                     );
             }
             else {
                 return du.Ex.ExVector.ElemProduct(
-                    di.InputManager.GetLeftAxis(Player),
+                    di.GamePad.GetLeftAxis(Player),
                     Factor);
             }
         }

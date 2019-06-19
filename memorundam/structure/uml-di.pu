@@ -7,6 +7,113 @@ title <size:18> di (directive Input Module) </size>
 
 package du {
 	package di {
+
+		package Id {
+			enum PlayerID
+			enum GamePadID
+			enum GamePadRawID
+
+			class IdConverter <static> {
+				+{static} GamePad ToGamePadID(Player playerID)
+				+{static} GamePadRaw ToRawID(GamePad gpID)
+				+{static} void SetPlayer2GamePad(Player playerID, GamePad gpID)
+				+{static} void ResetPlayer2GamePad()
+				+{static} void SetPlayer2GamePad(GamePad _1p, GamePad _2p, GamePad _3p, GamePad _4p)
+				+{static} void Initialize()
+				+{static} void Dump()
+			}
+			class GPIDconvertDesc {
+				+void Register(IDictionary<GamePad, GamePadRaw> gp2raw)
+			}
+			IdConverter --- GPIDconvertDesc
+		}
+
+		package Definition {
+			enum GPButton
+			enum GPArrow
+			enum GPArrowDirection
+			enum GPAxis
+		}
+
+		interface IUserInput {
+			+IArrowInput Arrow
+			+IButtonInput Button
+		}
+		IUserInput <|.. UserInput
+		IUserInput <|.. AnyUserInput
+		UserInput o-down- IArrowInput
+		UserInput o-down- IButtonInput
+		AnyUserInput o-down- IArrowInput
+		AnyUserInput o-down- IButtonInput
+
+		interface IButtonInput {
+			+bool Get(GPButton button);
+			+bool GetDown(GPButton button);
+			+bool GetUp(GPButton button);
+
+			+float GetF(GPButton button);
+			+float GetDownF(GPButton button);
+			+float GetUpF(GPButton button);
+		}
+		abstract AbsButtonInput {
+			{abstract}+bool Get(GPButton button);
+			{abstract}+bool GetDown(GPButton button);
+			{abstract}+bool GetUp(GPButton button);
+		}
+		IButtonInput <|.. AbsButtonInput
+		AbsButtonInput <|-- ButtonInput
+		AbsButtonInput <|-- AnyButtonInput
+		IButtonInput --o AnyButtonInput
+
+		interface IArrowInput {
+			+bool Get(GPArrow button);
+			+bool GetDown(GPArrow button);
+			+bool GetUp(GPArrow button);
+
+			+float GetF(GPArrow button);
+			+float GetDownF(GPArrow button);
+			+float GetUpF(GPArrow button);
+
+			+Vector2 GetVector();
+			+Vector2 GetVectorDown();
+			+Vector2 GetVectorUp();
+		}
+		abstract AbsArrowInput {
+			{abstract}+bool Get(GPArrow button);
+			{abstract}+bool GetDown(GPArrow button);
+			{abstract}+bool GetUp(GPArrow button);
+		}
+		IArrowInput <|.. AbsArrowInput
+		AbsArrowInput <|-- ArrowInput
+		AbsArrowInput <|-- AnyArrowInput
+		IArrowInput --o AnyArrowInput
+
+		package GamepadInput {
+			class GamePadImpl <static> {
+				+{static} bool GetButtonDown(Button button, GPRawID rawID)
+				+{static} bool GetButtonUp(Button button, GPRawID rawID)
+				+{static} bool GetButton(Button button, GPRawID rawID)
+				+{static} Vector2 GetAxis(Axis axis, GPRawID rawID, bool raw = false)
+				+{static} bool GetArrowKey(Arrow arrow, GPRawID controlIndex)
+				+{static} bool GetArrowKeyDown(Arrow arrow, GPRawID controlIndex)
+				+{static} float GetArrowAxisDown(ArrowDirection direction, GPRawID controlIndex)
+				+{static} GamepadState GetState(GPRawID controlIndex, bool raw = false)
+				+{static} int GetPlayerNum(Button button)
+			}
+		}
+
+		class KeyInput4GamePad <static> {
+			+{static} void Initialize()
+			+{static} IUserInput User(GamePadRawID)
+		}
+		class UserInputDesc {
+			+GamePadRaw GPRawID
+			+IUserInput Generate()
+		}
+		KeyInput4GamePad --down- UserInputDesc
+		KeyInput4GamePad o-down- IUserInput
+		UserInputDesc --right- IUserInput
+
 		class GamePad <static> {
 			+void Initialize()
 
@@ -24,6 +131,8 @@ package du {
 
 			+bool DebugKeyDown(KeyCode)
 		}
+		GamePad --> GamePadImpl
+		GamePad --> KeyInput4GamePad
 	}
 }
 

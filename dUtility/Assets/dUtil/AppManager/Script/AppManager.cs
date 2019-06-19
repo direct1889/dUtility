@@ -102,7 +102,7 @@ namespace du.App {
             // OSUI.Instance.SetEnable(m_mcmode == MouseCursorMode.Detail);
         }
         private void Initialize_di() {
-            di.InputManager.Initialize();
+            di.GamePad.Initialize();
             di.Id.IdConverter.SetPlayer2GamePad(
                 di.Id.GamePad._1P,
                 di.Id.GamePad._2P,

@@ -1,129 +1,85 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using UInput = UnityEngine.Input;
 
+namespace du.di {
 
-namespace du {
+    /// <summary> ボタン対応表 </summary>
+    public interface IButtonInput {
+        /// <summary> ボタンが押されている間:true </summary>
+        bool Get(GPButton button);
+        /// <summary> ボタンが押された瞬間:true </summary>
+        bool GetDown(GPButton button);
+        /// <summary> ボタンが放された瞬間:true </summary>
+        bool GetUp(GPButton button);
 
-
-    namespace di {
-
-
-        public interface IButtonInput {
-
-            bool Get(GPButton button);
-            bool GetDown(GPButton button);
-            bool GetUp(GPButton button);
-
-            float GetF(GPButton button);
-            float GetDownF(GPButton button);
-            float GetUpF(GPButton button);
-
-
-            string ToString();
-
-        }
-
-
-        public class ButtonInput : IButtonInput {
-
-            private Dictionary<GPButton, KeyCode> m_keys = null;
-
-
-            public ButtonInput(Dictionary<GPButton, KeyCode> map) {
-                m_keys = map;
-            }
-
-
-            public bool Get(GPButton button) {
-                return m_keys.ContainsKey(button)
-                    && UnityEngine.Input.GetKey(m_keys[button]);
-            }
-
-            public bool GetDown(GPButton button) {
-                return m_keys.ContainsKey(button)
-                    && UnityEngine.Input.GetKeyDown(m_keys[button]);
-            }
-
-            public bool GetUp(GPButton button) {
-                return m_keys.ContainsKey(button)
-                    && UnityEngine.Input.GetKeyUp(m_keys[button]);
-            }
-
-
-            public float GetF(GPButton button) {
-                return System.Convert.ToInt32(
-                    m_keys.ContainsKey(button)
-                    && UnityEngine.Input.GetKey(m_keys[button])
-                    );
-            }
-
-            public float GetDownF(GPButton button) {
-                return System.Convert.ToInt32(
-                    m_keys.ContainsKey(button)
-                    && UnityEngine.Input.GetKeyDown(m_keys[button])
-                    );
-            }
-
-            public float GetUpF(GPButton button) {
-                return System.Convert.ToInt32(
-                    m_keys.ContainsKey(button)
-                    && UnityEngine.Input.GetKeyUp(m_keys[button])
-                    );
-            }
-
-
-
-            public override string ToString() {
-                return string.Format("Two:{0}, Three:{1}, START:{2}",
-                    m_keys[GPButton.Circle],
-                    m_keys[GPButton.Cross],
-                    m_keys[GPButton.Start]);
-            }
-
-        }
-
-
-        public class AnyButtonInput : IButtonInput {
-
-            private List<IButtonInput> m_buttons = new List<IButtonInput>();
-
-            public AnyButtonInput(List<IButtonInput> buttons) {
-                m_buttons = buttons;
-            }
-
-
-            public bool Get(GPButton button) {
-                return m_buttons.Any(i => i.Get(button));
-            }
-
-            public bool GetDown(GPButton button) {
-                return m_buttons.Any(i => i.GetDown(button));
-            }
-
-            public bool GetUp(GPButton button) {
-                return m_buttons.Any(i => i.GetUp(button));
-            }
-
-
-            public float GetF(GPButton button) {
-                return System.Convert.ToInt32(Get(button));
-            }
-
-            public float GetDownF(GPButton button) {
-                return System.Convert.ToInt32(GetDown(button));
-            }
-
-            public float GetUpF(GPButton button) {
-                return System.Convert.ToInt32(GetUp(button));
-            }
-
-
-        }
-
-
+        /// <summary> ボタンが押されている間:1f else 0f </summary>
+        float GetF(GPButton button);
+        /// <summary> ボタンが押された瞬間:1f else 0f </summary>
+        float GetDownF(GPButton button);
+        /// <summary> ボタンが放された瞬間:1f else 0f </summary>
+        float GetUpF(GPButton button);
     }
 
+    /// <summary>
+    /// 抽象ボタン対応表
+    /// - 実装によって異なるのはGet/GetDown/GetUpのみ、それ以外を共通化
+    /// </summary>
+    public abstract class AbsButtonInput : IButtonInput {
+        #region getter
+        public abstract bool Get    (GPButton button);
+        public abstract bool GetDown(GPButton button);
+        public abstract bool GetUp  (GPButton button);
+
+        public float GetF    (GPButton button) => System.Convert.ToSingle(Get    (button));
+        public float GetDownF(GPButton button) => System.Convert.ToSingle(GetDown(button));
+        public float GetUpF  (GPButton button) => System.Convert.ToSingle(GetUp  (button));
+        #endregion
+    }
+
+    /// <summary> 単一ユーザ用ボタン対応表 </summary>
+    public class ButtonInput : AbsButtonInput {
+        #region field
+        /// <summary> 対応表の実体 </summary>
+        IDictionary<GPButton, KeyCode> m_keys;
+        #endregion
+
+        #region ctor
+        /// <param name="map"> ボタンとキー入力の対応辞書 </param>
+        public ButtonInput(IDictionary<GPButton, KeyCode> map) { m_keys = map; }
+        #endregion
+
+        #region getter
+        public override bool Get    (GPButton button) => m_keys.ContainsKey(button) && UInput.GetKey    (m_keys[button]);
+        public override bool GetDown(GPButton button) => m_keys.ContainsKey(button) && UInput.GetKeyDown(m_keys[button]);
+        public override bool GetUp  (GPButton button) => m_keys.ContainsKey(button) && UInput.GetKeyUp  (m_keys[button]);
+
+        public override string ToString() {
+            return $"Two:{m_keys[GPButton.Circle]}, Three:{m_keys[GPButton.Cross]}, START:{m_keys[GPButton.Start]}";
+        }
+        #endregion
+    }
+
+
+    /// <summary>
+    /// Anyユーザ用ボタン対応表
+    /// - ButtonInputを複数持ち、そのいずれかが発火していれば全体も発火
+    /// </summary>
+    public class AnyButtonInput : AbsButtonInput {
+        #region field
+        IEnumerable<IButtonInput> Buttons { get; }
+        #endregion
+
+        #region ctor
+        public AnyButtonInput(IEnumerable<IButtonInput> buttons) { Buttons = buttons; }
+        #endregion
+
+        #region getter
+        public override bool Get    (GPButton button) => Buttons.Any(i => i.Get(button));
+        public override bool GetDown(GPButton button) => Buttons.Any(i => i.GetDown(button));
+        public override bool GetUp  (GPButton button) => Buttons.Any(i => i.GetUp(button));
+        #endregion
+    }
 
 }

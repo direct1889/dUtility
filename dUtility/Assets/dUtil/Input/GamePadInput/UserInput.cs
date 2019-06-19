@@ -1,73 +1,58 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 
+namespace du.di {
 
+    /// <summary> GamePadとキーボードの入力対応表 </summary>
+    public interface IUserInput {
+        /// <value> 方向入力対応 </value>
+        IArrowInput Arrow { get; }
+        /// <value> ボタン入力対応 </value>
+        IButtonInput Button { get; }
+    }
 
-namespace du {
+    /// <summary> 単一ユーザ用入力対応表 </summary>
+    public class UserInput : IUserInput {
+        #region field
+        public IArrowInput Arrow { get; }
+        public IButtonInput Button { get; }
+        #endregion
 
-    namespace di {
-
-
-        public interface IUserInput {
-
-            IArrowInput Arrow { get; }
-            IButtonInput Button { get; }
-
-            string ToString();
-
+        #region ctor
+        public UserInput(IArrowInput arrow, IButtonInput button) {
+            Arrow = arrow; Button = button;
         }
+        #endregion
 
-        public class UserInput : IUserInput {
+        #region getter
+        public override string ToString() => $"Arrow[{Arrow}], Button[{Button}]";
+        #endregion
+    }
 
-            private readonly IArrowInput m_arrows = null;
-            private readonly IButtonInput m_buttons = null;
+    /// <summary>
+    /// Anyユーザ用入力対応表
+    /// - UserInputを複数持ち、そのいずれかが発火していれば全体も発火
+    /// </summary>
+    public class AnyUserInput : IUserInput {
+        #region field
+        public IArrowInput Arrow { get; }
+        public IButtonInput Button { get; }
+        #endregion
 
-            public IArrowInput Arrow { get { return m_arrows; } }
-            public IButtonInput Button { get { return m_buttons;} }
-
-            public UserInput(IArrowInput arrow, IButtonInput button) {
-                m_arrows = arrow;
-                m_buttons = button;
-            }
-
-            public override string ToString() {
-                return string.Format("Arrow[{0}], Button[{1}]",
-                    m_arrows, m_buttons);
-            }
-
+        #region ctor
+        public AnyUserInput(IEnumerable<IArrowInput> arrows, IEnumerable<IButtonInput> buttons) {
+            Arrow  = new AnyArrowInput (arrows);
+            Button = new AnyButtonInput(buttons);
         }
-
-        public class AnyUserInput : IUserInput {
-
-            private readonly IArrowInput m_arrows = null;
-            private readonly IButtonInput m_buttons = null;
-
-            public IArrowInput Arrow { get { return m_arrows; } }
-            public IButtonInput Button { get { return m_buttons;} }
-
-            public AnyUserInput(List<IArrowInput> arrows, List<IButtonInput> buttons) {
-                m_arrows = new AnyArrowInput(arrows);
-                m_buttons = new AnyButtonInput(buttons);
-            }
-
-            public AnyUserInput(List<IUserInput> userInput) {
-                List<IArrowInput> arrows = new List<IArrowInput>();
-                List<IButtonInput> buttons = new List<IButtonInput>();
-                for (int i = 0; i < userInput.Count; ++i) {
-                    arrows.Add(userInput[i].Arrow);
-                    buttons.Add(userInput[i].Button);
-                }
-                m_arrows = new AnyArrowInput(arrows);
-                m_buttons = new AnyButtonInput(buttons);
-            }
-
-
-            public override string ToString() {
-                return string.Format("Arrow:{0}, Button{1}", m_arrows, m_buttons);
-            }
-
+        public AnyUserInput(IEnumerable<IUserInput> userInputs) {
+            Arrow  = new AnyArrowInput (userInputs.Select(ui => ui.Arrow ));
+            Button = new AnyButtonInput(userInputs.Select(ui => ui.Button));
         }
+        #endregion
 
+        #region getter
+        public override string ToString() => $"Arrow[{Arrow}], Button[{Button}]";
+        #endregion
     }
 
 }

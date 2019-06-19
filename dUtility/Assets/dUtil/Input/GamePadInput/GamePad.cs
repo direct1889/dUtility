@@ -1,420 +1,139 @@
-//Author: Richard Pieterse
-//Date: 16 May 2013
-//Email: Merrik44@live.com
+﻿using UnityEngine;
+using System.Linq;
 
-using UnityEngine;
-using System.Collections.Generic;
-using System;
+using GamePadRawID = du.di.Id.GamePadRaw;
+using GamepadInput;
 
-using Button = du.di.GPButton;
-using Arrow = du.di.GPArrow;
-using ArrowDirection = du.di.GPArrowDirection;
-using Axis = du.di.GPAxis;
-using GPRawID = du.di.Id.GamePadRaw;
+using UInput = UnityEngine.Input;
+using PlayerID = du.di.Id.Player;
+using GamePadID = du.di.Id.GamePad;
+using static du.di.Id.ExId;
+using static du.Ex.ExVector;
 
-namespace GamepadInput {
+namespace du.di {
 
+    /// <summary>
+    /// ゲームパッドによる入力の管理
+    /// - デバッグ用としてキーボードからの入力も受け付ける
+    /// - ゲームパッドからとキーボードからの入力の違いを吸収する
+    /// </summary>
     public static class GamePad {
+        #region public
+        /// <summary> 初期化処理 </summary>
+        public static void Initialize() {
+            KeyInput4GamePad.Initialize();
+            Id.IdConverter.Initialize();
+        }
+        #endregion
 
-        // public enum Index { Any, One, Two, Three, Four, Index_Max }
+        #region getter
+        /// <summary>
+        /// キーボードによる入力はあくまでデバッグ用とみなす
+        /// </summary>
+        public static bool DebugKeyDown(KeyCode code) => UInput.GetKeyDown(code);
 
-        public static bool GetButtonDown(Button button, GPRawID controlIndex) {
-            KeyCode code = GetKeycode(button, controlIndex);
-            return Input.GetKeyDown(code);
+        /// <summary> ボタンが押された瞬間:true </summary>
+        public static bool GetButtonDown(PlayerID  plID, GPButton button) => GetButtonDown(plID.ToRawID(), button);
+        /// <summary> ボタンが押された瞬間:true </summary>
+        public static bool GetButtonDown(GamePadID gpID, GPButton button) => GetButtonDown(gpID.ToRawID(), button);
+        /// <summary> ボタンが押されている間:true </summary>
+        public static bool GetButton    (GamePadID gpID, GPButton button) => GetButton     (gpID.ToRawID(), button);
+
+        /// <summary> 十字ボタンの入力をVector2で取得 </summary>
+        public static Vector2 GetArrowDPadVec2(GamePadID gpID) => GetArrowDPadVec2(gpID.ToRawID());
+        /// <summary> 十字ボタンの指定方向が押されているか </summary>
+        public static bool GetArrowDPad(GamePadID gpID, GPArrow arrow) => GetArrowDPad(gpID.ToRawID(), arrow);
+
+        /// <summary> 方向入力(左)の入力をVector2で取得 </summary>
+        public static Vector2 GetLeftAxis(PlayerID  plID) => GetLeftAxis(plID.ToRawID());
+        /// <summary> 方向入力(左)の入力をVector2で取得 </summary>
+        public static Vector2 GetLeftAxis(GamePadID gpID) => GetLeftAxis(gpID.ToRawID());
+        /// <summary>
+        /// 方向入力(左)の入力をVector3で取得
+        /// - X:Horizontal / Y:0 / Z:Vertical
+        /// </summary>
+        public static Vector3 GetLeftAxisXZ(PlayerID  plID) => GetLeftAxis(plID.ToRawID()).AddY(0f);
+        /// <summary>
+        /// 方向入力(左)の入力をVector3で取得
+        /// - X:Horizontal / Y:0 / Z:Vertical
+        /// </summary>
+        public static Vector3 GetLeftAxisXZ(GamePadID gpID) => GetLeftAxis(gpID.ToRawID()).AddY(0f);
+        #endregion
+
+        #region private
+        /// <summary> ボタンが押された瞬間 : true </summary>
+        private static bool GetButtonDown(GamePadRawID gpRawID, GPButton button) {
+            return GamepadInput.GamePadImpl.GetButtonDown(button, gpRawID)
+                || di.KeyInput4GamePad.User(gpRawID).Button.GetDown(button);
+        }
+        /// <summary> いずれかのボタンが押された瞬間 : true </summary>
+        private static bool GetButtonDown(GamePadRawID gpRawID, params GPButton[] buttons) {
+            return buttons.Any(i => di.KeyInput4GamePad.User(gpRawID).Button.GetDown(i));
         }
 
-        public static bool GetButtonUp(Button button, GPRawID controlIndex) {
-            KeyCode code = GetKeycode(button, controlIndex);
-            return Input.GetKeyUp(code);
+        /// <summary> ボタンが放された瞬間 : true </summary>
+        private static bool GetButtonUp(GamePadRawID gpRawID, GPButton button) {
+            return GamepadInput.GamePadImpl.GetButtonUp(button, gpRawID)
+                || di.KeyInput4GamePad.User(gpRawID).Button.GetUp(button);
         }
 
-        public static bool GetButton(Button button, GPRawID controlIndex) {
-            KeyCode code = GetKeycode(button, controlIndex);
-            return Input.GetKey(code);
+        /// <summary> ボタンが押されている間 : true </summary>
+        private static bool GetButton(GamePadRawID gpRawID, GPButton button) {
+            return GamepadInput.GamePadImpl.GetButton(button, gpRawID)
+                || di.KeyInput4GamePad.User(gpRawID).Button.Get(button);
+        }
+
+        /// <summary> 十字ボタンの指定方向が押されているか </summary>
+        /// <returns> 押されている:1f, 押されていない:0f </returns>
+        private static float GetArrow(GamePadRawID gpRawID, GPArrow arrow) {
+            // true -> 1f / false -> 0f
+            return System.Convert.ToSingle(GamepadInput.GamePadImpl.GetArrowKey(arrow, gpRawID));
+        }
+
+        /// <summary> 十字ボタンの指定方向が押されているか </summary>
+        /// <returns> 押されている:1f, 押されていない:0f </returns>
+        private static float GetArrowKeyAsFloat(GamePadRawID gpRawID, GPArrow arrow) {
+            return System.Convert.ToSingle(GamepadInput.GamePadImpl.GetArrowKey(arrow, gpRawID));
+        }
+
+        /// <summary> 十字ボタンの入力をVector2で取得 </summary>
+        private static Vector2 GetArrowDPadVec2(GamePadRawID gpRawID) {
+            return (GamepadInput.GamePadImpl.GetAxis(GPAxis.Dpad, gpRawID)
+                + di.KeyInput4GamePad.User(gpRawID).Arrow.GetVector())
+                .Clamped(-1f, 1f);
+        }
+
+        /// <summary> 十字ボタンの指定方向が押されているか </summary>
+        private static bool GetArrowDPad(GamePadRawID gpRawID, GPArrow arrow) {
+            Vector2 dpad = GamepadInput.GamePadImpl.GetAxis(GPAxis.Dpad, gpRawID);
+            switch (arrow) {
+                case GPArrow.Left  : return dpad.x <= -1.0f;
+                case GPArrow.Right : return dpad.x >=  1.0f;
+                case GPArrow.Up    : return dpad.y >=  1.0f;
+                case GPArrow.Down  : return dpad.y <= -1.0f;
+                case GPArrow.Any   : return dpad.x <= -1.0f || dpad.x >=  1.0f || dpad.y >=  1.0f || dpad.y <= -1.0f;
+                default            : return false;
+            }
         }
 
         /// <summary>
-        /// returns a specified axis
+        /// 方向入力(左)をVector2で取得
+        /// - 左スティック/十字ボタン/キーボード入力 を統合
         /// </summary>
-        /// <param name="axis">One of the analogue sticks, or the dpad</param>
-        /// <param name="controlIndex">The controller number</param>
-        /// <param name="raw">if raw is false then the controlIndex will be returned with a deadspot</param>
-        /// <returns></returns>
+        private static Vector2 GetLeftAxis(GamePadRawID gpRawID) {
 
-        public static Vector2 GetAxis(Axis axis, GPRawID controlIndex, bool raw = false) {
+            Vector2 total
+                = GamepadInput.GamePadImpl.GetAxis(GPAxis.LeftStick, gpRawID)        // アナログスティック
+                + GamepadInput.GamePadImpl.GetAxis(GPAxis.Dpad, gpRawID)             // 十字ボタン
+                + KeyInput4GamePad.User(gpRawID).Arrow.GetVector(); // キーボード
 
-            List<AxisName> axisNameList = new List<AxisName>();
-            string xName = "", yName = "";
-
-
-            switch (axis) {
-                case Axis.Dpad:
-                    xName = "DPad_XAxis_" + (int)controlIndex;
-                    yName = "DPad_YAxis_" + (int)controlIndex;
-                    axisNameList.Add(new AxisName(xName, yName));
-                    break;
-                case Axis.LeftStick:
-                    xName = "L_XAxis_" + (int)controlIndex;
-                    yName = "L_YAxis_" + (int)controlIndex;
-                    axisNameList.Add(new AxisName(xName, yName));
-                    break;
-                case Axis.RightStick:
-                    xName = "R_XAxis_" + (int)controlIndex;
-                    yName = "R_YAxis_" + (int)controlIndex;
-                    axisNameList.Add(new AxisName(xName, yName));
-                    break;
-                case Axis.Any:
-                    xName = "DPad_XAxis_" + (int)controlIndex;
-                    yName = "DPad_YAxis_" + (int)controlIndex;
-                    axisNameList.Add(new AxisName(xName, yName));
-                    xName = "L_XAxis_" + (int)controlIndex;
-                    yName = "L_YAxis_" + (int)controlIndex;
-                    axisNameList.Add(new AxisName(xName, yName));
-                    xName = "R_XAxis_" + (int)controlIndex;
-                    yName = "R_YAxis_" + (int)controlIndex;
-                    axisNameList.Add(new AxisName(xName, yName));
-                    break;
-            }
-
-            Vector2 axisXY = Vector3.zero;
-
-            try {
-                foreach (AxisName elem in axisNameList) {
-                    float x, y;
-
-                    if (raw == false) {
-                        x = Input.GetAxis(elem.xName);
-                        y = Input.GetAxis(elem.yName);
-                    }
-                    else {
-                        x = Input.GetAxisRaw(elem.xName);
-                        y = Input.GetAxisRaw(elem.yName);
-                    }
-
-                    Vector2 vec = new Vector2(x, y);
-                    float mag = vec.magnitude;
-
-                    if (mag > 0f) {
-                        axisXY.x = x;
-                        axisXY.y = y;
-                    }
-                }
-
-
-            }
-            catch (System.Exception e) {
-                Debug.LogError(e);
-                Debug.LogWarning("Have you set up all axes correctly? \nThe easiest solution is to replace the InputManager.asset with version located in the GamepadInput package. \nWarning: do so will overwrite any existing input");
-            }
-            return axisXY;
-        }
-
-
-
-        public static bool GetArrowKey(Arrow arrow, GPRawID controlIndex) {
-            Vector2 axis = GetAxis(Axis.Any, controlIndex);
-
-            switch (arrow) {
-                case Arrow.Left:
-                    if (axis.x <= -1.0f) {
-                        return true;
-                    }
-                    break;
-                case Arrow.Right:
-                    if (axis.x >= 1.0f) {
-                        return true;
-                    }
-                    break;
-                case Arrow.Up:
-                    if (axis.y >= 1.0f) {
-                        return true;
-                    }
-                    break;
-                case Arrow.Down:
-                    if (axis.y <= -1.0f) {
-                        return true;
-                    }
-                    break;
-                case Arrow.Any:
-                    if (axis.x <= -1.0f) {
-                        return true;
-                    }
-                    else if (axis.x >= 1.0f) {
-                        return true;
-                    }
-                    else if (axis.y >= 1.0f) {
-                        return true;
-                    }
-                    else if (axis.y <= -1.0f) {
-                        return true;
-                    }
-                    break;
-            }
-
-            return false;
-        }
-
-
-        private static bool[,] previousIsArrow = new bool[(int)GPRawID.Index_Max, (int)Arrow.Arrow_Max];
-
-        public static bool GetArrowKeyDown(Arrow arrow, GPRawID controlIndex) {
-            bool isArrow = GetArrowKey(arrow, controlIndex);
-
-            bool returnValue;
-
-            try {
-                if (previousIsArrow[(int)controlIndex, (int)arrow] == false) {
-                    //前フレームで押されていない時
-                    returnValue = isArrow;
-                }
-                else {
-                    //前フレームで押されていた時
-                    returnValue = false;
-                }
-            }
-            catch (IndexOutOfRangeException ex) {
-                Debug.Log(ex);
-                Debug.Log("Array Length:" + previousIsArrow.Length);
-                Debug.Log("control Index:" + controlIndex);
-                return false;
-            }
-
-
-            //前フレームの情報を更新
-            previousIsArrow[(int)controlIndex, (int)arrow] = GetArrowKey(arrow, controlIndex);
-
-
-
-            return returnValue;
-        }
-
-
-        public static float GetArrowAxisDown(ArrowDirection direction, GPRawID controlIndex) {
-            switch (direction) {
-                case ArrowDirection.Horizontal:
-                    if (GetArrowKeyDown(Arrow.Left, controlIndex)) {
-                        return -1f;
-                    }
-                    if (GetArrowKeyDown(Arrow.Right, controlIndex)) {
-                        return 1f;
-                    }
-                    break;
-                case ArrowDirection.Vertical:
-                    if (GetArrowKeyDown(Arrow.Down, controlIndex)) {
-                        return -1f;
-                    }
-                    if (GetArrowKeyDown(Arrow.Up, controlIndex)) {
-                        return 1f;
-                    }
-                    break;
-            }
-
-
-            return 0f;
-        }
-
-        //public static float GetTrigger(Trigger trigger, Index controlIndex, bool raw = false)
-        //{
-        //    //
-        //    string name = "";
-        //    if (trigger == Trigger.LeftTrigger)
-        //        name = "TriggersL_" + (int)controlIndex;
-        //    else if (trigger == Trigger.RightTrigger)
-        //        name = "TriggersR_" + (int)controlIndex;
-
-        //    //
-        //    float axis = 0;
-        //    try
-        //    {
-        //        if (raw == false)
-        //            axis = Input.GetAxis(name);
-        //        else
-        //            axis = Input.GetAxisRaw(name);
-        //    }
-        //    catch (System.Exception e)
-        //    {
-        //        Debug.LogError(e);
-        //        Debug.LogWarning("Have you set up all axes correctly? \nThe easiest solution is to replace the InputManager.asset with version located in the GamepadInput package. \nWarning: do so will overwrite any existing input");
-        //    }
-        //    return axis;
-        //}
-
-
-        static KeyCode GetKeycode(Button button, GPRawID controlIndex) {
-            switch (controlIndex) {
-                case GPRawID._1P:
-                    switch (button) {
-                        case Button.Triangle: return KeyCode.Joystick1Button0;
-                        case Button.Circle: return KeyCode.Joystick1Button1;
-                        case Button.Cross: return KeyCode.Joystick1Button2;
-                        case Button.Square: return KeyCode.Joystick1Button3;
-                        case Button.LeftShoulder1: return KeyCode.Joystick1Button4;
-                        case Button.RightShoulder1: return KeyCode.Joystick1Button5;
-                        case Button.LeftShoulder2: return KeyCode.Joystick1Button6;
-                        case Button.RightShoulder2: return KeyCode.Joystick1Button7;
-                        case Button.Select: return KeyCode.Joystick1Button8;
-                        case Button.Start: return KeyCode.Joystick1Button9;
-                        case Button.LeftStick: return KeyCode.Joystick1Button10;
-                        case Button.RightStick: return KeyCode.Joystick1Button11;
-                    }
-                    break;
-
-                case GPRawID._2P:
-                    switch (button) {
-                        case Button.Triangle: return KeyCode.Joystick2Button0;
-                        case Button.Circle: return KeyCode.Joystick2Button1;
-                        case Button.Cross: return KeyCode.Joystick2Button2;
-                        case Button.Square: return KeyCode.Joystick2Button3;
-                        case Button.LeftShoulder1: return KeyCode.Joystick2Button4;
-                        case Button.RightShoulder1: return KeyCode.Joystick2Button5;
-                        case Button.LeftShoulder2: return KeyCode.Joystick2Button6;
-                        case Button.RightShoulder2: return KeyCode.Joystick2Button7;
-                        case Button.Select: return KeyCode.Joystick2Button8;
-                        case Button.Start: return KeyCode.Joystick2Button9;
-                        case Button.LeftStick: return KeyCode.Joystick2Button10;
-                        case Button.RightStick: return KeyCode.Joystick2Button11;
-                    }
-                    break;
-
-                case GPRawID._3P:
-                    switch (button) {
-                        case Button.Triangle: return KeyCode.Joystick3Button0;
-                        case Button.Circle: return KeyCode.Joystick3Button1;
-                        case Button.Cross: return KeyCode.Joystick3Button2;
-                        case Button.Square: return KeyCode.Joystick3Button3;
-                        case Button.LeftShoulder1: return KeyCode.Joystick3Button4;
-                        case Button.RightShoulder1: return KeyCode.Joystick3Button5;
-                        case Button.LeftShoulder2: return KeyCode.Joystick3Button6;
-                        case Button.RightShoulder2: return KeyCode.Joystick3Button7;
-                        case Button.Select: return KeyCode.Joystick3Button8;
-                        case Button.Start: return KeyCode.Joystick3Button9;
-                        case Button.LeftStick: return KeyCode.Joystick3Button10;
-                        case Button.RightStick: return KeyCode.Joystick3Button11;
-                    }
-                    break;
-
-                case GPRawID._4P:
-                    switch (button) {
-                        case Button.Triangle: return KeyCode.Joystick4Button0;
-                        case Button.Circle: return KeyCode.Joystick4Button1;
-                        case Button.Cross: return KeyCode.Joystick4Button2;
-                        case Button.Square: return KeyCode.Joystick4Button3;
-                        case Button.LeftShoulder1: return KeyCode.Joystick4Button4;
-                        case Button.RightShoulder1: return KeyCode.Joystick4Button5;
-                        case Button.LeftShoulder2: return KeyCode.Joystick4Button6;
-                        case Button.RightShoulder2: return KeyCode.Joystick4Button7;
-                        case Button.Select: return KeyCode.Joystick4Button8;
-                        case Button.Start: return KeyCode.Joystick4Button9;
-                        case Button.LeftStick: return KeyCode.Joystick4Button10;
-                        case Button.RightStick: return KeyCode.Joystick4Button11;
-                    }
-                    break;
-
-                case GPRawID.Any:
-                    switch (button) {
-                        case Button.Triangle: return KeyCode.JoystickButton0;
-                        case Button.Circle: return KeyCode.JoystickButton1;
-                        case Button.Cross: return KeyCode.JoystickButton2;
-                        case Button.Square: return KeyCode.JoystickButton3;
-                        case Button.LeftShoulder1: return KeyCode.JoystickButton4;
-                        case Button.RightShoulder1: return KeyCode.JoystickButton5;
-                        case Button.LeftShoulder2: return KeyCode.JoystickButton6;
-                        case Button.RightShoulder2: return KeyCode.JoystickButton7;
-                        case Button.Select: return KeyCode.JoystickButton8;
-                        case Button.Start: return KeyCode.JoystickButton9;
-                        case Button.LeftStick: return KeyCode.JoystickButton10;
-                        case Button.RightStick: return KeyCode.JoystickButton11;
-                    }
-                    break;
-            }
-            return KeyCode.None;
-        }
-
-
-        public static GamepadState GetState(GPRawID controlIndex, bool raw = false) {
-            GamepadState state = new GamepadState();
-
-            state.One = GetButton(Button.Triangle, controlIndex);
-            state.Two = GetButton(Button.Circle, controlIndex);
-            state.Three = GetButton(Button.Cross, controlIndex);
-            state.Four = GetButton(Button.Square, controlIndex);
-
-            state.RightShoulder1 = GetButton(Button.RightShoulder1, controlIndex);
-            state.LeftShoulder1 = GetButton(Button.LeftShoulder1, controlIndex);
-            state.RightShoulder2 = GetButton(Button.RightShoulder2, controlIndex);
-            state.LeftShoulder2 = GetButton(Button.LeftShoulder2, controlIndex);
-
-            state.RightStick = GetButton(Button.RightStick, controlIndex);
-            state.LeftStick = GetButton(Button.LeftStick, controlIndex);
-
-            state.Start = GetButton(Button.Start, controlIndex);
-            state.Select = GetButton(Button.Select, controlIndex);
-
-            state.LeftStickAxis = GetAxis(Axis.LeftStick, controlIndex, raw);
-            state.rightStickAxis = GetAxis(Axis.RightStick, controlIndex, raw);
-            state.dPadAxis = GetAxis(Axis.Dpad, controlIndex, raw);
-
-            state.Left = (state.dPadAxis.x < 0 || state.LeftStickAxis.x <= -1.0f);
-            state.Right = (state.dPadAxis.x > 0 || state.LeftStickAxis.x >= 1.0f);
-            state.Up = (state.dPadAxis.y > 0 || state.LeftStickAxis.y >= 1.0f);
-            state.Down = (state.dPadAxis.y < 0 || state.LeftStickAxis.y <= -1.0f);
-
-            //state.LeftTrigger = GetTrigger(Trigger.LeftTrigger, controlIndex, raw);
-            //state.RightTrigger = GetTrigger(Trigger.RightTrigger, controlIndex, raw);
-
-            return state;
-        }
-
-        public static int GetPlayerNum(Button button) {
-
-            for (GPRawID rawId = GPRawID._1P; rawId < GPRawID.Index_Max; ++rawId) {
-                if (GetButtonDown(button, GPRawID._1P)) {
-                    return (int)rawId;
-                }
-            }
-            return -1;
+            if (total.magnitude <= 1f) { return total; }
+            else { return total / total.magnitude; }
 
         }
 
+        #endregion
 
-    }
-
-    public class AxisName {
-        public string xName { get; private set; }
-        public string yName { get; private set; }
-
-        public AxisName(string xName, string yName) {
-            this.xName = xName;
-            this.yName = yName;
-        }
-    }
-
-
-
-    public class GamepadState {
-        public bool One = false;
-        public bool Two = false;
-        public bool Three = false;
-        public bool Four = false;
-        public bool Start = false;
-        public bool Select = false;
-        public bool Left = false;
-        public bool Right = false;
-        public bool Up = false;
-        public bool Down = false;
-        public bool LeftStick = false;
-        public bool RightStick = false;
-        public bool RightShoulder1 = false;
-        public bool LeftShoulder1 = false;
-        public bool RightShoulder2 = false;
-        public bool LeftShoulder2 = false;
-
-        public Vector2 LeftStickAxis = Vector2.zero;
-        public Vector2 rightStickAxis = Vector2.zero;
-        public Vector2 dPadAxis = Vector2.zero;
-
-        //public float LeftTrigger = 0;
-        //public float RightTrigger = 0;
 
     }
 
