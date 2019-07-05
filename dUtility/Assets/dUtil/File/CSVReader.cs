@@ -14,7 +14,7 @@ namespace du.File {
     // 参考サイト
     // http://magnaga.com/unity/2016/06/20/csvreader/
 
-    //! CSVの列とのマッピングのための属性クラス
+    /// <summary> CSVの列とのマッピングのための属性クラス </summary>
     public class CSVColAttr : Attribute {
         public int ColumnIndex { get; set; }
         public object DefaultValue { get; set; }
@@ -42,9 +42,10 @@ namespace du.File {
         /// <summary>
         /// 列番号をキーとしてフィールド or プロパティへのsetメソッドが格納されます。
         /// </summary>
-        private Dictionary<int, Action<object, string>>
-            setters = new Dictionary<int, Action<object, string>>();
+        private Dictionary<int, Action<object, string>> setters = new Dictionary<int, Action<object, string>>();
+        #endregion
 
+        #region private
         /// <summary>
         /// Tの情報をロードします。
         /// setterには列番号をキーとしたsetメソッドが格納されます。
@@ -157,14 +158,15 @@ namespace du.File {
         #endregion
 
         #region ctor/dtor
+        /// <summary> インスタンス化は static method を通じて行う </summary>
         /// <param name="filePath"> du.App.AppManager.DataPath以下、.csvを除いたファイル名を指定 </param>
-        public CSVReader(string filePath, bool skipFirstLine, bool loadFromResources = false, Encoding encoding = null)
+        private CSVReader(string filePath, bool skipFirstLine, bool loadFromResources = false, Encoding encoding = null)
         {
             // 既定のエンコードの設定
             encoding = encoding ?? Encoding.GetEncoding("utf-8");
             LoadType(); // Tを解析する
             //! Resources内のファイルをロード
-            m_reader = loadFromResources ? CreateTextReaderFromResources(filePath) : CreateTextReaderRaw(du.App.AppManager.DataPath + filePath);
+            m_reader = loadFromResources ? CreateTextReaderFromResources(filePath) : CreateTextReaderRaw(filePath);
             if (m_reader == null) {
                 Debug.Assert(false, "failure to load file : " + filePath + ".csv");
                 return;
@@ -200,6 +202,15 @@ namespace du.File {
                 yield return data;
             }
         }
+        #endregion
+
+        #region static
+        public static CSVReader<T> FromMyData(string pathInMyData, bool skipFirstLine, Encoding encoding = null)
+            => new CSVReader<T>(App.AppManager.DataPath + pathInMyData, skipFirstLine, false, encoding);
+        public static CSVReader<T> FromResources(string pathInResources, bool skipFirstLine, Encoding encoding = null)
+            => new CSVReader<T>(pathInResources, skipFirstLine, true, encoding);
+        public static CSVReader<T> FromFullPath(string pathInAssets, bool skipFirstLine, Encoding encoding = null)
+            => new CSVReader<T>(Application.dataPath + pathInAssets, skipFirstLine, false, encoding);
         #endregion
 
         #region private

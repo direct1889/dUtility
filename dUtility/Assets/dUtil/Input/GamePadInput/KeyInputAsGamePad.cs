@@ -21,7 +21,7 @@ namespace du.di {
 
             m_input = new Dictionary<GamePadRaw, IUserKeyAsGP>();
             // CSVファイルから対応を読み込む
-            using (var reader = new File.CSVReader<UserKeyAsGPDesc>("Utility/KeyInput4GamePad", true))
+            using (var reader = File.CSVReader<UserKeyAsGPDesc>.FromMyData("dUtil/Input/KeyInput4GamePad", true))
             {
                 foreach (var desc in reader) {
                     m_input.Add(desc.GPRawID, desc.Generate());

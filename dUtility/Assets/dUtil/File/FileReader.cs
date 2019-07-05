@@ -22,7 +22,7 @@ namespace du.File {
 
         #region ctor/dtor
         /// <param name="filePath"> Asset/MyData/[filePath].csv </param>
-        public FReader(string fileName) {
+        private FReader(string fileName) {
             m_lines = new List<string>(
                 System.IO.File.ReadAllText(App.AppManager.DataPath + fileName).Split('\n'));
         }
@@ -33,6 +33,12 @@ namespace du.File {
             if (0 <= line && line < LineLength) { return m_lines[line]; }
             else { return null; }
         }
+        #endregion
+
+        #region static
+        public static IFReader FromMyData  (string pathInMyData) => new FReader(App.AppManager.DataPath + pathInMyData);
+        //  public static IFReader FromResources(string pathInResources) => new FReader(pathInResources);
+        public static IFReader FromFullPath(string pathInAssets) => new FReader(Application.dataPath + pathInAssets);
         #endregion
 
     }

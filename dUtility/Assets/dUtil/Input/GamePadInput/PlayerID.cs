@@ -101,7 +101,7 @@ namespace du.di.Id {
         /// <summary> PlayerIDとGamePadIDの対応を一括読み込み </summary>
         public static void Initialize() {
             ResetPlayer2GamePad();
-            using (var reader = new File.CSVReader<GPIDConvertDesc>("Utility/RawGamePadWrapper", true))
+            using (var reader = File.CSVReader<GPIDConvertDesc>.FromMyData("dUtil/Input/RawGamePadWrapper", true))
             {
                 foreach (var desc in reader) { desc.Register(gamepad2raw); }
             }
